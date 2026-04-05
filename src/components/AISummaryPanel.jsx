@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, AlertTriangle, TrendingUp, TrendingDown, Minus, Target, Grip, Award } from 'lucide-react';
-import { getPatientAnalysis } from '../api/client';
+import { getUserAnalysis } from '../api/client';
 import MetricCard from './MetricCard';
 
 const TREND_CONFIG = {
@@ -10,20 +10,20 @@ const TREND_CONFIG = {
   'insufficient data': { label: 'Insufficient Data', color: 'bg-slate-500/20 text-slate-400', icon: Minus },
 };
 
-function AISummaryPanel({ patientId }) {
+function AISummaryPanel({ userId }) {
   const [analysis, setAnalysis] = useState(null);
   const [aiSummary, setAiSummary] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!patientId) return;
+    if (!userId) return;
 
     let cancelled = false;
     setLoading(true);
     setError(null);
 
-    getPatientAnalysis(patientId)
+    getUserAnalysis(userId)
       .then(data => {
         if (cancelled) return;
         setAnalysis(data.analysis);
@@ -39,7 +39,7 @@ function AISummaryPanel({ patientId }) {
       });
 
     return () => { cancelled = true; };
-  }, [patientId]);
+  }, [userId]);
 
   if (loading) return <SkeletonLoader />;
 
@@ -63,7 +63,6 @@ function AISummaryPanel({ patientId }) {
 
   return (
     <div className="space-y-6">
-      {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Avg Accuracy" value={`${analysis.avg_accuracy}%`} sub={`Best: ${analysis.best_accuracy}%`} icon={<Target className="w-5 h-5 text-blue-400" />} />
         <StatCard label="Avg Grip" value={analysis.avg_grip.toFixed(1)} sub={`${analysis.session_count} sessions`} icon={<Grip className="w-5 h-5 text-purple-400" />} />
@@ -79,7 +78,6 @@ function AISummaryPanel({ patientId }) {
         </div>
       </div>
 
-      {/* Per-Exercise Table */}
       <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
         <div className="p-5 border-b border-slate-700">
           <h3 className="text-lg font-semibold text-white">Per-Exercise Breakdown</h3>
@@ -116,7 +114,6 @@ function AISummaryPanel({ patientId }) {
         </div>
       </div>
 
-      {/* AI Summary */}
       <div className="bg-gradient-to-br from-slate-800 to-slate-800/80 rounded-2xl border border-indigo-500/20 p-6 shadow-lg">
         <div className="flex items-center gap-3 mb-5">
           <div className="p-2.5 bg-indigo-500/15 rounded-xl">

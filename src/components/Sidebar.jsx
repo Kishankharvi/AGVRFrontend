@@ -6,7 +6,7 @@ const TABS = [
   { id: 'ai-report', label: 'AI Report', icon: Brain },
 ];
 
-function Sidebar({ patients, selectedPatient, onSelectPatient, activeTab, onTabChange }) {
+function Sidebar({ users, selectedUser, onSelectUser, activeTab, onTabChange }) {
   return (
     <aside className="w-64 min-h-screen bg-slate-950 border-r border-slate-800 flex flex-col shrink-0">
       <div className="p-6 border-b border-slate-800">
@@ -19,18 +19,18 @@ function Sidebar({ patients, selectedPatient, onSelectPatient, activeTab, onTabC
       <div className="p-4 border-b border-slate-800">
         <label className="text-xs text-slate-400 font-medium uppercase tracking-wider flex items-center mb-2">
           <Users className="w-3.5 h-3.5 mr-1.5" />
-          Patient
+          User
         </label>
         <select
-          value={selectedPatient}
-          onChange={(e) => onSelectPatient(e.target.value)}
+          value={selectedUser}
+          onChange={(e) => onSelectUser(e.target.value)}
           className="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
         >
-          {patients.length === 0 ? (
-            <option disabled value="">No patients found</option>
+          {users.length === 0 ? (
+            <option disabled value="">No users found</option>
           ) : (
-            patients.map(p => (
-              <option key={p} value={p}>{p}</option>
+            users.map(u => (
+              <option key={u} value={u}>{u}</option>
             ))
           )}
         </select>

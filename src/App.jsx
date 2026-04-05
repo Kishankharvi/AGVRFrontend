@@ -1,48 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Activity, Brain, Clock } from 'lucide-react';
-import { getPatients, getPatientSessions, getPatientForecast, getPatientAnalysis } from './api/client';
+import { getUsers, getUserSessions, getUserForecast, getUserAnalysis } from './api/client';
 import Sidebar from './components/Sidebar';
 import MetricCard from './components/MetricCard';
 import ChartsView from './components/ChartsView';
 import AISummaryPanel from './components/AISummaryPanel';
 
 function App() {
-  const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState('');
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState('');
   const [sessionsData, setSessionsData] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [analysis, setAnalysis] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
 
-  // Fetch all patients on mount
   useEffect(() => {
-    const fetchPatients = async () => {
+    const fetchUsers = async () => {
       try {
-        const data = await getPatients();
-        setPatients(data);
+        const data = await getUsers();
+        setUsers(data);
         if (data.length > 0) {
-          setSelectedPatient(data[0]);
+          setSelectedUser(data[0]);
         }
       } catch (err) {
-        console.error('Failed to fetch patients:', err);
+        console.error('Failed to fetch users:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchPatients();
+    fetchUsers();
   }, []);
 
-  // Fetch session data + forecast when patient changes
   useEffect(() => {
-    if (!selectedPatient) return;
+    if (!selectedUser) return;
 
     const fetchData = async () => {
       try {
         const [sessionsRes, forecastRes] = await Promise.allSettled([
-          getPatientSessions(selectedPatient),
-          getPatientForecast(selectedPatient),
+          getUserSessions(selectedUser),
+          getUserForecast(selectedUser),
         ]);
 
         if (sessionsRes.status === 'fulfilled') {
@@ -57,10 +55,9 @@ function App() {
       }
     };
 
-    // Fetch analysis separately (for ChartsView radar)
     const fetchAnalysis = async () => {
       try {
-        const data = await getPatientAnalysis(selectedPatient);
+        const data = await getUserAnalysis(selectedUser);
         setAnalysis(data.analysis);
       } catch {
         setAnalysis(null);
@@ -69,7 +66,7 @@ function App() {
 
     fetchData();
     fetchAnalysis();
-  }, [selectedPatient]);
+  }, [selectedUser]);
 
   if (loading) {
     return (
@@ -87,9 +84,9 @@ function App() {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-900 text-slate-50">
       <Sidebar
-        patients={patients}
-        selectedPatient={selectedPatient}
-        onSelectPatient={setSelectedPatient}
+        users={users}
+        selectedUser={selectedUser}
+        onSelectUser={setSelectedUser}
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
@@ -98,23 +95,22 @@ function App() {
         {sessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-slate-500 py-20 rounded-2xl border border-slate-800 bg-slate-800/50 mt-10">
             <Activity className="w-16 h-16 mb-4 text-slate-600" />
-            <p className="text-xl">No session data available for this patient.</p>
+            <p className="text-xl">No session data available for this user.</p>
           </div>
         ) : (
           <div className="max-w-7xl mx-auto space-y-8">
-            {/* Page Header */}
             <div className="mb-2">
               <h2 className="text-2xl font-bold text-white">
                 {activeTab === 'overview' && 'Overview'}
                 {activeTab === 'charts' && 'Analytics & Charts'}
                 {activeTab === 'ai-report' && 'AI Clinical Report'}
               </h2>
-              <p className="text-slate-400 text-sm mt-1">Patient: {selectedPatient}</p>
+              <p className="text-slate-400 text-sm mt-1">User: {selectedUser}</p>
             </div>
 
             {activeTab === 'overview' && <OverviewView sessions={sessions} />}
             {activeTab === 'charts' && <ChartsView sessions={sessions} forecast={forecast} analysis={analysis} />}
-            {activeTab === 'ai-report' && <AISummaryPanel patientId={selectedPatient} />}
+            {activeTab === 'ai-report' && <AISummaryPanel userId={selectedUser} />}
           </div>
         )}
       </main>
@@ -122,7 +118,6 @@ function App() {
   );
 }
 
-/** Overview tab: metric cards + sessions table */
 function OverviewView({ sessions }) {
   const avgAccuracy = sessions.length > 0
     ? (sessions.reduce((acc, s) => acc + s.overallAccuracy, 0) / sessions.length).toFixed(1)
@@ -136,7 +131,6 @@ function OverviewView({ sessions }) {
 
   return (
     <div className="space-y-8">
-      {/* Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <MetricCard
           title="Total Sessions"
@@ -158,7 +152,6 @@ function OverviewView({ sessions }) {
         />
       </div>
 
-      {/* Sessions Table */}
       <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-lg">
         <div className="p-6 border-b border-slate-700">
           <h2 className="text-xl font-semibold text-white">Recent Sessions History</h2>

@@ -7,22 +7,22 @@ const api = axios.create({
   timeout: 30000,
 });
 
-export async function getPatients() {
-  const res = await api.get('/patients');
+export async function getUsers() {
+  const res = await api.get('/users');
   return res.data;
 }
 
-export async function getPatientSessions(patientId) {
-  const res = await api.get(`/patient/${patientId}`);
+export async function getUserSessions(userId) {
+  const res = await api.get(`/user/${userId}`);
   return res.data;
 }
 
-export async function getPatientAnalysis(patientId) {
-  const res = await api.get(`/patient/${patientId}/analyse`);
+export async function getUserAnalysis(userId) {
+  const res = await api.get(`/user/${userId}/analyse`);
   return res.data;
 }
 
-export async function getPatientForecast(patientId) {
-  const res = await api.get(`/patient/${patientId}/forecast`);
+export async function getUserForecast(userId) {
+  const res = await api.get(`/user/${userId}/forecast`);
   return res.data;
 }
